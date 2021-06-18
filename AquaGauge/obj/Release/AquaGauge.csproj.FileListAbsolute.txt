@@ -1,7 +1,0 @@
-C:\_develop\OAGSeeker\AquaGauge\bin\Release\AquaGauge.dll
-C:\_develop\OAGSeeker\AquaGauge\bin\Release\AquaGauge.pdb
-C:\_develop\OAGSeeker\AquaGauge\obj\Release\AquaControls.AquaGauge.resources
-C:\_develop\OAGSeeker\AquaGauge\obj\Release\AquaGauge.csproj.GenerateResource.cache
-C:\_develop\OAGSeeker\AquaGauge\obj\Release\AquaGauge.csproj.CoreCompileInputs.cache
-C:\_develop\OAGSeeker\AquaGauge\obj\Release\AquaGauge.dll
-C:\_develop\OAGSeeker\AquaGauge\obj\Release\AquaGauge.pdb
