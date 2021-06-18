@@ -120,15 +120,6 @@
   <metadata name="backgroundWorkerExposure.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="buttonExposure.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wwAADsMBx2+oZAAAAIlJREFUOE/lkjEOgCAQBCl8jI+zoLKlJYQX8TllTY7cLWektxhU3B0IIZyhGWqt
-        eynl8uAsMB8558MrCsj0Z9Sd8cJhD51LKW1D8LWywAsNwQqeAOflbp3LGs5OE15Jw/m/CTgLpqsrQS6/
-        8Qy9EFmwwhDo0qrAXGWACfxYEUjZCDReCeC8bLaFGxNF81z9OFd2AAAAAElFTkSuQmCC
-</value>
-  </data>
   <metadata name="timerPosition.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>223, 17</value>
   </metadata>
@@ -138,6 +129,7 @@
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>82</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAQAMDAAAAAAGACoHAAARgAAACAgAAAAABgAqAwAAO4cAAAQEAAAAAAYAGgDAACWKQAAEBAAAAAA

@@ -116,5 +116,11 @@
     <None Include="Resources\Exposure.png" />
     <Content Include="Resources\Image1.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AquaGauge\AquaGauge.csproj">
+      <Project>{0e5542e0-fc5d-4f67-950d-9f28c5d1225a}</Project>
+      <Name>AquaGauge</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
