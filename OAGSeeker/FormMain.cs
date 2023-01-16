@@ -42,8 +42,10 @@ namespace OAGSeeker
 
         private string _cameraId = "ASCOM.Simulator.Camera";
         private string _rotatorId = "";
+        private string _focuserId = "";
         private Camera _camera = null;
         private Rotator _rotator = null;
+        private Focuser _focuser = null;
         private double _exposure = 1.5;
         private int _stretchFactor = 256;
         private double _resolution = 0.0;
@@ -55,6 +57,11 @@ namespace OAGSeeker
 
         private float _rotatorAngle = 0.0f;
         private bool _rotatorIsMoving = false;
+
+        private int _focuserRelativePosition = 0;
+        private int _focuserRelativeStepFine = 100;
+        private int _focuserRelativeStepFast = 1000;
+
 
         #endregion
 
@@ -69,6 +76,8 @@ namespace OAGSeeker
             InitializeComponent();
             UpdateAscomDeviceLabels();
             _rotatorId = Properties.Settings.Default["RotatorId"].ToString();
+            _focuserId = Properties.Settings.Default["FocuserId"].ToString();
+
             UpdateAscomDeviceLabels();
             EnableRotatorControls(false);
 
@@ -76,6 +85,7 @@ namespace OAGSeeker
             rotatorGauge.MaxValue = 360;
             rotatorGauge.Glossiness = 12;
             rotatorGauge.Value = 50;
+            this.Size = new Size(320, this.Size.Height);
         }
 
         #region ASCOM
@@ -94,13 +104,29 @@ namespace OAGSeeker
                 buttonRotateZero.Enabled = false;
             }
         }
-     
+
+        private void EnableFocuserControls(bool en)
+        {
+            if (en == true)
+            {
+                this.Size = new Size(548, this.Size.Height);
+            }
+            else
+            {
+                this.Size = new Size(320, this.Size.Height);
+            }
+        }
+
         private void UpdateAscomDeviceLabels()
         {
             string visibleText = _rotatorId;
             if (visibleText.Length > 32)
                 visibleText = visibleText.Substring(0, 32) + "...";
             labelRotator.Text = visibleText;
+            visibleText = _focuserId;
+            if (visibleText.Length > 32)
+                visibleText = visibleText.Substring(0, 32) + "...";
+            labelFocuser.Text = visibleText;
         }
 
         
@@ -183,10 +209,23 @@ namespace OAGSeeker
 
         private void timerPosition_Tick(object sender, EventArgs e)
         {
-            if (_rotator == null) return;
-            labelAngle.Text = _rotator.Position.ToString(CultureInfo.InvariantCulture) + " °";
-            _rotatorAngle = _rotator.Position;
-            rotatorGauge.Value = _rotatorAngle;
+            if (_rotator != null)
+            {
+                labelAngle.Text = _rotator.Position.ToString(CultureInfo.InvariantCulture) + " °";
+                _rotatorAngle = _rotator.Position;
+                rotatorGauge.Value = _rotatorAngle;
+            }
+            if (_focuser != null)
+            {
+                if (_focuser.Absolute == true)
+                {
+                    labelPosition.Text = _focuser.Position.ToString(CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    labelPosition.Text = _focuserRelativePosition.ToString(CultureInfo.InvariantCulture);
+                }
+            }
         }
 
         private void timerIsRotatorMoving_Tick(object sender, EventArgs e)
@@ -249,6 +288,202 @@ namespace OAGSeeker
             
         }
 
-        
+        private void buttonChooseFocuser_Click(object sender, EventArgs e)
+        {
+            _focuserId = Focuser.Choose(_focuserId);
+            UpdateAscomDeviceLabels();
+            Properties.Settings.Default["FocuserId"] = _focuserId;
+            Properties.Settings.Default.Save();
+        }
+
+        private void buttonFocuserConnect_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_focuser == null)
+                {
+                    _focuser = new Focuser(_focuserId);
+                    _focuser.Connected = true;
+                    if (_focuser.Connected)
+                    {
+                        this.buttonFocuserConnect.Image = global::OAGSeeker.Properties.Resources.On;
+                        EnableFocuserControls(true);
+                        if(_focuser.Absolute == false)
+                        {
+                            _focuserRelativePosition = _focuser.MaxIncrement / 2;
+                            textBoxFocuserMove.Text = _focuserRelativePosition.ToString();
+                            buttonFocuserStop.Enabled = false;
+                        }
+                    }
+                    else
+                    {
+                        EnableFocuserControls(false);
+                        _focuser.Dispose();
+                        _focuser = null;
+                    }
+                }
+                else
+                {
+                    _focuser.Connected = false;
+                    _focuser.Dispose();
+                    _focuser = null;
+                    this.buttonFocuserConnect.Image = global::OAGSeeker.Properties.Resources.Off;
+                    EnableFocuserControls(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_rotator != null)
+                    _rotator.Dispose();
+                _rotator = null;
+                this.buttonRotatorConnect.Image = global::OAGSeeker.Properties.Resources.Off;
+                EnableRotatorControls(false);
+            }
+        }
+
+        private void buttonFineLeft_Click(object sender, EventArgs e)
+        {
+            if (_focuser == null) return;
+            if (_focuser.Connected == false) return;
+            if (_focuser.Absolute)
+            {
+                int pos = _focuser.Position - _focuserRelativeStepFine;
+                _focuser.Move(pos);
+            }
+            else
+            {
+                if (_focuserRelativePosition - _focuserRelativeStepFine > 0)
+                {
+                    _focuserRelativePosition -= _focuserRelativeStepFine;
+                    _focuser.Move(-_focuserRelativeStepFine);
+                }
+            }
+        }
+
+        private void buttonFineRight_Click(object sender, EventArgs e)
+        {
+            if (_focuser == null) return;
+            if (_focuser.Connected == false) return;
+            if (_focuser.Absolute)
+            {
+                int pos = _focuser.Position + _focuserRelativeStepFine;
+                _focuser.Move(pos);
+            }
+            else
+            {
+                if (_focuserRelativePosition + _focuserRelativeStepFine < _focuser.MaxIncrement)
+                {
+                    _focuserRelativePosition += _focuserRelativeStepFine;
+                    _focuser.Move(_focuserRelativeStepFine);
+                }
+            }
+        }
+
+        private void buttonFocuserMove_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int pos = Convert.ToInt32(textBoxFocuserMove.Text);
+                if(_focuser.Absolute)
+                {
+                    if(pos < _focuser.MaxIncrement && pos >= 0)
+                    {
+                        _focuser.Move(pos);
+                    }
+                }
+                else
+                {
+                    int newPos = pos - _focuserRelativePosition;
+                    if(_focuserRelativePosition + newPos < _focuser.MaxIncrement && _focuserRelativePosition + newPos >= 0)
+                    {
+                        _focuser.Move(newPos);
+                        _focuserRelativePosition += newPos;
+
+                    }
+                }
+            } catch(Exception ex)
+            {
+                textBoxFocuserMove.Text = _focuserRelativePosition.ToString();
+            }
+        }
+
+        private void SetFocuserMoving(bool val)
+        {
+            if(val)
+            {
+                buttonFastLeft.Enabled = false;
+                buttonFastRight.Enabled = false;
+                buttonFineLeft.Enabled = false;
+                buttonFineRight.Enabled = false;
+                buttonFocuserMove.Enabled = false;
+                buttonFocuserStop.Enabled = true;        
+            }
+            else
+            {
+                buttonFastLeft.Enabled = true;
+                buttonFastRight.Enabled = true;
+                buttonFineLeft.Enabled = true;
+                buttonFineRight.Enabled = true;
+                buttonFocuserMove.Enabled = true;
+                buttonFocuserStop.Enabled = false;
+            }
+        }
+        private void timerFocuserMoving_Tick(object sender, EventArgs e)
+        {
+            if (_focuser == null) return;
+            if (_focuser.Connected == false) return;
+            SetFocuserMoving(_focuser.IsMoving);
+        }
+
+        private void buttonFocuserStop_Click(object sender, EventArgs e)
+        {
+            _focuser.Halt();
+            if(_focuser.Absolute)
+            {
+                textBoxFocuserMove.Text = _focuser.Position.ToString();
+            }
+            else
+            {
+                textBoxFocuserMove.Text = _focuserRelativePosition.ToString();
+            }
+        }
+
+        private void buttonFastLeft_Click(object sender, EventArgs e)
+        {
+            if (_focuser == null) return;
+            if (_focuser.Connected == false) return;
+            if (_focuser.Absolute)
+            {
+                int pos = _focuser.Position - _focuserRelativeStepFast;
+                _focuser.Move(pos);
+            }
+            else
+            {
+                if (_focuserRelativePosition - _focuserRelativeStepFast > 0)
+                {
+                    _focuserRelativePosition -= _focuserRelativeStepFast;
+                    _focuser.Move(-_focuserRelativeStepFast);
+                }
+            }
+        }
+
+        private void buttonFastRight_Click(object sender, EventArgs e)
+        {
+            if (_focuser == null) return;
+            if (_focuser.Connected == false) return;
+            if (_focuser.Absolute)
+            {
+                int pos = _focuser.Position + _focuserRelativeStepFast;
+                _focuser.Move(pos);
+            }
+            else
+            {
+                if (_focuserRelativePosition + _focuserRelativeStepFast > _focuser.MaxIncrement)
+                {
+                    _focuserRelativePosition += _focuserRelativeStepFast;
+                    _focuser.Move(_focuserRelativeStepFast);
+                }
+            }
+        }
     }
 }
